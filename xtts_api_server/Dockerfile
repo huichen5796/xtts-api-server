@@ -7,7 +7,7 @@ LABEL description="Docker image for xtts-api-server"
 # Install required packages (avoid cache to reduce image size)
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    python3-dev portaudio19-dev libportaudio2 libasound2-dev libportaudiocpp0 \
+    python3-dev portaudio19-dev libportaudio2 libasound2-dev libportaudiocpp0 curl \
     git python3 python3-pip make g++ ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
@@ -15,16 +15,16 @@ RUN apt-get update && \
 RUN python3 -m pip install --upgrade pip setuptools wheel ninja virtualenv
 
 # Copy the application source code to /app directory and change the workdir to /app
-# COPY . /app
-# WORKDIR /app
+COPY . /xtts_api_server
+WORKDIR /xtts_api_server
 
 # Install Python dependencies
+RUN pip install -r requirements.txt
 RUN pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
 RUN pip install deepspeed
-RUN pip install xtts-api-server
 
 # Expose the container ports
 EXPOSE 8020
 
 # Run xtts_api_server when the container starts
-CMD ["bash", "-c", "python3 -m xtts_api_server --listen -p 8020 -t 'http://localhost:8020' -sf 'xtts-server/speakers' -o 'xtts-server/output' -mf 'xtts-server/models' --deepspeed"]
+CMD ["bash", "-c", "python3 -m xtts_api_server --listen -p 8020 -t 'http://0.0.0.0:8020' -sf 'example' -o 'xtts-server/output' -mf 'xtts-server/models' --deepspeed"]

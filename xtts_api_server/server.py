@@ -141,6 +141,12 @@ class SynthesisFileRequest(BaseModel):
     language: str
     file_name_or_path: str  
 
+@app.get("/")
+def read_root():
+    return {
+        "success": True
+    }
+
 @app.get("/speakers_list")
 def get_speakers():
     speakers = XTTS.get_speakers()
